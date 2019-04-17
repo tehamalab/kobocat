@@ -73,8 +73,8 @@ class Command(BaseCommand):
 
         Bucket._get_all = _get_all
 
-        s3 = get_storage_class('storages.backends.s3boto.S3BotoStorage')()
-        all_files = s3.bucket.list()
+        self._s3 = get_storage_class('onadata.libs.utils.extended_s3boto_storage.ExtendedS3BotoStorage')()
+        all_files = self._s3.bucket.list(prefix="oleger1")
         size_to_reclaim = 0
         orphans = 0
 
@@ -151,13 +151,14 @@ class Command(BaseCommand):
     def delete(self, file_object):
         try:
             print("File {} does not exist in DB".format(file_object.name).encode('utf-8'))
-            file_object.delete()
+            self._s3.delete_all(file_object.name)
         except Exception as e:
             print("ERROR - Could not delete file {} - Reason {}".format(
                 file_object.name,
                 str(e)))
 
-    def sizeof_fmt(self, num, suffix='B'):
+    @staticmethod
+    def sizeof_fmt(num, suffix='B'):
         for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
             if abs(num) < 1024.0:
                 return "%3.1f%s%s" % (num, unit, suffix)
