@@ -9,6 +9,28 @@ import dj_database_url
 
 from onadata.settings.common import *
 
+from onadata.libs.utils.string import sbool
+from onadata.libs.utils.environ import Env
+
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(PROJECT_ROOT, ".env"))
+except ImportError:
+    pass
+
+env = Env(os.environ)
+
+DEBUG = env('DJANGO_DEBUG', 'false', sbool)
+
+PRINT_EXCEPTION = env('PRINT_EXCEPTION', 'false', sbool)
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = env('SECRET_KEY', 's3cr3t-K3y')
+
+ALLOWED_HOSTS = env('ALLOWED_HOSTS', '*').split()
+
+INTERNAL_IPS = env('INTERNAL_IPS', '127.0.0.1').split()
 
 def celery_logger_setup_handler(logger, **kwargs):
     """
@@ -25,8 +47,7 @@ def celery_logger_setup_handler(logger, **kwargs):
 
 LOCALE_PATHS = [os.path.join(PROJECT_ROOT, 'locale'), ]
 
-DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
-TEMPLATE_DEBUG = os.environ.get('TEMPLATE_DEBUG', 'True') == 'True'
+TEMPLATE_DEBUG = env('TEMPLATE_DEBUG', 'false')
 TEMPLATE_STRING_IF_INVALID = ''
 
 
@@ -49,12 +70,6 @@ CELERY_BROKER_URL = os.environ.get(
 
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 
-try:
-    SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
-except KeyError:
-    raise Exception('DJANGO_SECRET_KEY must be set in the environment.')
-
-ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '*').split(' ')
 
 TESTING_MODE = False
 # This trick works only when we run tests from the command line.
@@ -264,7 +279,7 @@ if (os.getenv("RAVEN_DSN") or "") != "":
         CELERY_WORKER_HIJACK_ROOT_LOGGER = False
         after_setup_logger.connect(celery_logger_setup_handler)
 
-POSTGIS_VERSION = (2, 5, 0)
+POSTGIS_VERSION = [int(i) for i in env('POSTGIS_VERSION', '2.5.0').split('.')]
 
 CELERY_BEAT_SCHEDULE = {
     # Periodically mark exports stuck in the "pending" state as "failed"

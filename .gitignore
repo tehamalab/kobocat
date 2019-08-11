@@ -57,3 +57,6 @@ custom_template
 .vagrant
 Vagrantfile
 ansible
+
+# Environment variables
+.env
