@@ -26,9 +26,9 @@ DEBUG = env('DJANGO_DEBUG', 'false', sbool)
 PRINT_EXCEPTION = env('PRINT_EXCEPTION', 'false', sbool)
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('SECRET_KEY', 's3cr3t-K3y')
+SECRET_KEY = env('DJANGO_SECRET_KEY', 's3cr3t-K3y')
 
-ALLOWED_HOSTS = env('ALLOWED_HOSTS', '*').split()
+ALLOWED_HOSTS = env('DJANGO_ALLOWED_HOSTS', '*').split()
 
 INTERNAL_IPS = env('INTERNAL_IPS', '127.0.0.1').split()
 
@@ -62,11 +62,11 @@ MONGO_DATABASE = {
     'PORT': int(os.environ.get('KOBOCAT_MONGO_PORT', 27017)),
     'NAME': os.environ.get('KOBOCAT_MONGO_NAME', 'formhub'),
     'USER': os.environ.get('KOBOCAT_MONGO_USER', ''),
-    'PASSWORD': os.environ.get('KOBOCAT_MONGO_PASS', '')
+    'PASSWORD': os.environ.get('KOBOCAT_MONGO_PASS', ''),
+    'SSL': env('KOBOCAT_MONGO_SSL', 'true', sbool)
 }
 
-CELERY_BROKER_URL = os.environ.get(
-    'KOBOCAT_BROKER_URL', 'amqp://guest:guest@rabbit:5672/')
+CELERY_BROKER_URL = env('KOBOCAT_BROKER_URL', 'amqp://guest:guest@rabbit:5672/')
 
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 
@@ -83,10 +83,10 @@ if len(sys.argv) >= 2 and (sys.argv[1] == "test"):
 else:
     TESTING_MODE = False
 
-MEDIA_URL = '/' + os.environ.get('KOBOCAT_MEDIA_URL', 'media').strip('/') + '/'
-STATIC_URL = '/static/'
-LOGIN_URL = '/accounts/login/'
-LOGIN_REDIRECT_URL = '/login_redirect/'
+STATIC_ROOT = env('KOBOCAT_STATIC_ROOT', os.path.join(PROJECT_ROOT, 'staticfiles'))
+STATIC_URL = env('KOBOCAT_STATIC_URL', '/static/')
+MEDIA_ROOT = env('KOBOCAT_MEDIA_ROOT', os.path.join(PROJECT_ROOT, 'media'))
+MEDIA_URL = env('KOBOCAT_MEDIA_URL', '/media/')
 
 if os.environ.get('KOBOCAT_ROOT_URI_PREFIX'):
     KOBOCAT_ROOT_URI_PREFIX = '/' + os.environ['KOBOCAT_ROOT_URI_PREFIX'].strip('/') + '/'
@@ -158,7 +158,7 @@ else:
 # PyMongo 3 does acknowledged writes by default
 # https://emptysqua.re/blog/pymongos-new-default-safe-writes/
 MONGO_CONNECTION = MongoClient(
-    MONGO_CONNECTION_URL, j=True, tz_aware=True)
+    MONGO_CONNECTION_URL, j=True, tz_aware=True, ssl=MONGO_DATABASE.get('SSL'))
 
 MONGO_DB = MONGO_CONNECTION[MONGO_DATABASE['NAME']]
 
