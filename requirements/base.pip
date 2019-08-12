@@ -80,3 +80,7 @@ transifex-client
 
 # Shell Plus
 django-extensions==1.6.7
+
+
+# configuration
+python-dotenv
