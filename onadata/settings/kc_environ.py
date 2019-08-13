@@ -153,6 +153,8 @@ if MONGO_DATABASE.get('USER') and MONGO_DATABASE.get('PASSWORD'):
 else:
     MONGO_CONNECTION_URL = "mongodb://%(HOST)s:%(PORT)s" % MONGO_DATABASE
 
+MONGO_CONNECTION_URL = env('MONGO_CONNECTION_URL', MONGO_CONNECTION_URL)
+
 # PyMongo 3 does acknowledged writes by default
 # https://emptysqua.re/blog/pymongos-new-default-safe-writes/
 MONGO_CONNECTION = MongoClient(
